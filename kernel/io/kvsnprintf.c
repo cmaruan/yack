@@ -20,7 +20,6 @@ strlen(const char *src)
                 size++;
         }
         return size;
-        ;
 }
 
 static const char *
@@ -56,7 +55,7 @@ itoa(int32_t value, int base)
         char *ptr = (char *)utoa(value, base);
         if (neg)
                 *ptr-- = '-';
-        return ptr + 1;
+        return ptr;
 }
 
 int
@@ -64,7 +63,7 @@ kvsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 {
         char *ptr = buf;
         const char *text;
-        while (*fmt) {
+        while (*fmt && ptr < buf + bufsz) {
                 if (*fmt != '%') {
                         *ptr++ = *fmt++;
                         continue;

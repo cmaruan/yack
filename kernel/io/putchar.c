@@ -20,31 +20,65 @@ enum vga_color {
         VGA_COLOR_WHITE = 15,
 };
 
+#define MAX_ROWS 25
+#define MAX_COLS 80
+
 #define VGA_MEMORY_ADDRESS (void *)0xB8000
 #define TO_VGA(c) \
         (((uint16_t)(c)) | ((VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4)) << 8)
 
-uint16_t *buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
-uint16_t *curr_buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
+static uint16_t *buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
+
+static int col;
+static int row;
+
+static void *
+memmov(void *dst, const void *src, size_t size) {
+        char *dst_ = dst;
+        const char *src_ = src;
+        while (size-- != 0) {
+                *dst_++ = *src_++;
+        }
+        return dst;
+}
 
 static void
-init_buffer()
+init_buffer_()
 {
-        for (int i = 0; i < (80 * 24); i++) buffer[i] = TO_VGA(' ');
+        for (int i = 0; i < (MAX_COLS * MAX_ROWS); i++) buffer[i] = TO_VGA(' ');
+        col = 0;
+        row = 0;
+}
+
+static void
+new_line_()
+{
+        col = 0;
+        row++;
+        if (row == MAX_ROWS) {
+                memmov(buffer, buffer + MAX_COLS, MAX_COLS * (MAX_ROWS-1));
+        }
+}
+
+static void
+advance_()
+{
+        if (++col == MAX_COLS) {
+                new_line_();
+        }
 }
 
 void
 putchar(char c)
 {
-        if (curr_buffer == buffer) {
-                init_buffer();
+        if (col == 0 && row == 0) {
+                init_buffer_();
         }
         if (c == '\n') {
-                curr_buffer =
-                    buffer +
-                    ((((uint32_t)(curr_buffer - buffer) / 80) + 1) * 80);
+                new_line_();
         }
         else {
-                *curr_buffer++ = TO_VGA(c);
+                buffer[row * MAX_COLS + col] = TO_VGA(c);
+                advance_();
         }
 }
