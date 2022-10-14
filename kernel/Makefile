@@ -6,7 +6,6 @@ include ../include.mk
 include $(ARCHDIR)/config.mk
 
 LIBDIRS = \
-ironfs \
 mm \
 io \
 
