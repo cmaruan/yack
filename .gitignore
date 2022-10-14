@@ -2,3 +2,5 @@
 **/*.o
 **/*.a
 **/.depends
+.vscode/
+.idea/
