@@ -57,6 +57,7 @@ new_line_()
         row++;
         if (row == MAX_ROWS) {
                 memmov(buffer, buffer + MAX_COLS, MAX_COLS * (MAX_ROWS-1));
+                row--;
         }
 }
 
