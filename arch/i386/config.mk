@@ -6,6 +6,8 @@ KERNEL_ARCH_LIBS +=
 KERNEL_ARCH_OBJS=\
 $(subst .c,.o,$(wildcard $(ARCHDIR)/*.c)) \
 $(ARCHDIR)/asm/entry.o \
+$(ARCHDIR)/asm/traps.o \
+$(ARCHDIR)/asm/helpers.o \
 
 
 

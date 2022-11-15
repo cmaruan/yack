@@ -1,0 +1,4 @@
+
+
+ironfs:
+	echo $(PROGNAME)

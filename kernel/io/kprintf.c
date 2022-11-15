@@ -1,16 +1,14 @@
 #include "io.h"
 
-int
+ssize_t
 kprintf(const char *fmt, ...)
 {
         char buffer[IO_MAXBUFSIZE];
-        char *ptr = buffer;
         va_list ap;
         va_start(ap, fmt);
-        int rv = kvsnprintf(buffer, IO_MAXBUFSIZE, fmt, ap);
+        ssize_t bytes = kvsnprintf(buffer, IO_MAXBUFSIZE, fmt, ap);
         va_end(ap);
-        while (*ptr) {
-                putchar(*ptr++);
-        }
-        return rv;
+        if (bytes > 0)
+                write(buffer, bytes);
+        return bytes;
 }

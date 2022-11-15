@@ -57,13 +57,15 @@ extern bool __list_add_valid(struct list_head *new,
 			      struct list_head *next);
 extern bool __list_del_entry_valid(struct list_head *entry);
 #else
-static inline bool __list_add_valid(struct list_head *new,
-				struct list_head *prev,
-				struct list_head *next)
+// __list_add_valid(new, prev, next)
+static inline bool __list_add_valid(struct list_head *,
+				struct list_head *,
+				struct list_head *)
 {
 	return true;
 }
-static inline bool __list_del_entry_valid(struct list_head *entry)
+// __list_del_entry_valid(entry)
+static inline bool __list_del_entry_valid(struct list_head *)
 {
 	return true;
 }

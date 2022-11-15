@@ -62,18 +62,21 @@ SECTIONS
 		*(.rodata)
 	}
 
+	. = ALIGN(0x1000);
+	PROVIDE(data = .);
 	/* Read-write data (initialized) */
 	.data : AT(ADDR(.data) - VIRT_BASE) ALIGN(4K) {
 		*(.data.*)
 		*(.data)
 	}
-
+	PROVIDE(edata = .);
 	/* Read-write data (uninitialized) and stack */
 	.bss : AT(ADDR(.bss) - VIRT_BASE) {
 		*(.bss.*)
 		*(.bss)
 		*(COMMON)
 	}
+	
 	
 	PROVIDE(end = .);
 
@@ -98,6 +101,4 @@ SECTIONS
 	.stab.index 0 : { *(.stab.index) }
 	.stab.indexstr 0 : { *(.stab.indexstr) }
 	.comment 0 : { *(.comment) }
-
-
 }

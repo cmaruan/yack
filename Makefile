@@ -1,5 +1,7 @@
 include macros.mk
 
+all: kernel
+
 kernel:
 	$(MAKE) -C kernel
 

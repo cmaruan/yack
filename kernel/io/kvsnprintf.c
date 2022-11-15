@@ -58,27 +58,41 @@ itoa(int32_t value, int base)
         return ptr;
 }
 
-int
+ssize_t
 kvsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 {
         char *ptr = buf;
         const char *text;
+        size_t fill_zeroes;
+        size_t fill_length;
+        size_t len;
         while (*fmt && ptr < buf + bufsz) {
+                fill_length = 0;
+                fill_zeroes = 0;
                 if (*fmt != '%') {
                         *ptr++ = *fmt++;
                         continue;
                 }
+        again:
                 switch (*++fmt) {
+                case '0':
+                        fill_zeroes = 1;
+                        goto again;
                 case '%':
                         text = "%";
                         break;
                 case 'd':
                         text = itoa(va_arg(ap, int), 10);
+                        fill_length = 10;
                         break;
                 case 'p':
                         *ptr++ = '0';
                         *ptr++ = 'x';
+                        fill_zeroes = 1;
+                        // fallthrough
+                case 'x':
                         text = utoa((uint32_t)va_arg(ap, void *), 16);
+                        fill_length = 8;
                         break;
                 case 's':
                         text = va_arg(ap, const char *);
@@ -92,6 +106,10 @@ kvsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
                         break;
                 default:
                         text = "";
+                }
+                len = strlen(text);
+                while (fill_zeroes && len < fill_length--) {
+                        *ptr++ = '0';
                 }
                 strcpy(ptr, text);
                 ptr += strlen(text);

@@ -8,6 +8,8 @@ include $(ARCHDIR)/config.mk
 LIBDIRS = \
 mm \
 io \
+drivers \
+hardware \
 
 LINKFLAGS = $(addprefix -l,$(LIBDIRS))
 LDFLAGS += $(patsubst %,-L$(CURDIR)/%/, $(LIBDIRS))
@@ -17,6 +19,7 @@ LIBS += -nostdlib -lgcc
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
+memop.o \
 kmain.o \
 
 OBJS=\
@@ -36,7 +39,7 @@ $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/asm/crtn.o \
 
-all: kernel
+all: kernel.elf
 
 export CFLAGS += $(KERNEL_ARCH_CFLAGS)
 export CPPFLAGS += $(KERNEL_ARCH_CPPFLAGS)
@@ -45,14 +48,14 @@ export CPPFLAGS += $(KERNEL_ARCH_CPPFLAGS)
 $(LIBDIRS): 
 	$(MAKE) -C $@
 
-kernel: $(LIBDIRS) $(OBJS) $(ARCHDIR)/linker.ld
+kernel.elf: $(LIBDIRS) $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST) $(LINKFLAGS)
 
 $(ARCHDIR)/crtend.o $(ARCHDIR)/crtbegin.o:
 	$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F) | xargs -I{} cp {} $@
 
 clean: $(SUBDIRSCLEAN)
-	$(RM) -rf *.a $(KERNEL_OBJS) kernel $(ARCHDIR)/*.o
+	$(RM) -rf *.a $(KERNEL_OBJS) kernel.elf $(ARCHDIR)/*.o
 
 %clean: 
 	$(MAKE) -C $(subst clean,,$@) clean

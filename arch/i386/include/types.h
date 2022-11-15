@@ -1,6 +1,10 @@
 #if !defined(ARCH_I386_TYPES_H)
 #define ARCH_I386_TYPES_H
 
+#ifndef __ASSEMBLY__
+#include <stddef.h>
+#endif
+
 #ifdef __INT8_TYPE__
 #ifdef __ASSEMBLY__
 #define int8_t __INT8_TYPE__
@@ -65,6 +69,22 @@ typedef __UINT64_TYPE__ uint64_t;
 #endif  // __ASSEMBLY__
 #endif
 
+#ifdef __SSIZE_TYPE__
+#ifdef __ASSEMBLY__
+#define ssize_t __SSIZE_TYPE__
+#else
+typedef __SSIZE_TYPE__ ssize_t;
+#endif  // __ASSEMBLY__
+#else
+#ifdef __ASSEMBLY__
+#define ssize_t __INT64_TYPE__
+#else
+typedef __INT64_TYPE__ ssize_t;
+#endif  // __ASSEMBLY__
+#endif
+
+#ifndef NULL
 #define NULL ((void *)0)
+#endif
 
 #endif  // ARCH_I386_TYPES_H

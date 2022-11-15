@@ -1,6 +1,7 @@
 **/*.img
 **/*.o
 **/*.a
+**/*.elf
 **/.depends
 .vscode/
 .idea/

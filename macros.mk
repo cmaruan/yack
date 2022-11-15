@@ -1,5 +1,6 @@
 ifndef TOOLPREFIX
-$(error TOOLPREFIX must be defined)
+export TOOLPREFIX=i686-elf-
+$(info [INFO]    using $$TOOLPREFIX as ${TOOLPREFIX})
 endif
 
 _CC = $(TOOLPREFIX)gcc

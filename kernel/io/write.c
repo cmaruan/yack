@@ -1,5 +1,7 @@
+#include "drivers/serial.h"
 #include "io.h"
 #include "memlayout.h"
+#include "memop.h"
 
 enum vga_color {
         VGA_COLOR_BLACK = 0,
@@ -32,16 +34,22 @@ static uint16_t *buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
 static int col;
 static int row;
 
-static void *
-memmov(void *dst, const void *src, size_t size) {
-        char *dst_ = dst;
-        const char *src_ = src;
-        while (size-- != 0) {
-                *dst_++ = *src_++;
-        }
-        return dst;
-}
+/* The I/O ports */
+#define FB_COMMAND_PORT 0x3D4
+#define FB_DATA_PORT    0x3D5
 
+/* The I/O port commands */
+#define FB_HIGH_BYTE_COMMAND 14
+#define FB_LOW_BYTE_COMMAND  15
+
+static void
+move_cursor_(uint16_t pos)
+{
+        outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+        outb(FB_DATA_PORT, ((pos >> 8) & 0x00FF));
+        outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+        outb(FB_DATA_PORT, pos & 0x00FF);
+}
 static void
 init_buffer_()
 {
@@ -56,8 +64,11 @@ new_line_()
         col = 0;
         row++;
         if (row == MAX_ROWS) {
-                memmov(buffer, buffer + MAX_COLS, MAX_COLS * (MAX_ROWS-1));
+                memmove(buffer, buffer + MAX_COLS,
+                        2 * (MAX_COLS * (MAX_ROWS - 1)));
                 row--;
+                for (int i = 0; i < MAX_COLS; i++)
+                        buffer[row * MAX_COLS + i] = TO_VGA(' ');
         }
 }
 
@@ -69,7 +80,7 @@ advance_()
         }
 }
 
-void
+static void
 putchar(char c)
 {
         if (col == 0 && row == 0) {
@@ -82,4 +93,16 @@ putchar(char c)
                 buffer[row * MAX_COLS + col] = TO_VGA(c);
                 advance_();
         }
+        move_cursor_(row * MAX_COLS + col);
+}
+
+ssize_t
+write(const char *str, size_t size)
+{
+        ssize_t bytes = 0;
+        serial_write(str, size);
+        for (; size-- != 0; str++, bytes++) {
+                putchar(*str);
+        }
+        return bytes;
 }
