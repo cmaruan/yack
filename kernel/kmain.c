@@ -10,6 +10,8 @@ do_shutdown()
         outw(0x604, 0x2000);
 }
 
+
+
 void
 kmain()
 {
@@ -22,9 +24,13 @@ kmain()
         trap_init();
         kvm_init();
         segments_init();
+        klog(DEBUG, "Calling STI\n");
         sti();
-        // Test if can call exception handler
-        asm volatile("int $0x6");
+        
+        int *ptr = (int *)0xffffffff;
+        *ptr = 45;
+
         klog(DEBUG, "Trap counter: %u\n", trap_counter);
+        klog(DEBUG, "Last trapno: %u\n", last_trapno);
         do_shutdown();
 }

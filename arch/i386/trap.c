@@ -3,6 +3,8 @@
 #include "x86.h"
 
 unsigned int trap_counter;
+unsigned int last_trapno;
+
 enum {
         IDT_FLAG_GATE_TASK = 0x5,
         IDT_FLAG_GATE_16BIT_INT = 0x6,
@@ -47,25 +49,20 @@ trap_init()
                 int flags =
                     IDT_FLAG_RING0 | IDT_FLAG_PRESENT | IDT_FLAG_GATE_32BIT_INT;
                 x86_set_idt_gate(i, trap_addr, 0x8, flags);
-                // uint16_t* ide = (uint16_t*)&trap_table[i];
-                // klog(DEBUG, "IDT(%d) addr %p: base: 0x%x%x cs: %x flags:
-                // %x\n",
-                //      i, trap_addr, ide[3], ide[0], ide[1], ide[2]);
         }
         klog(DEBUG, "sizeof struct trap_handler: %u\n",
              sizeof(struct trap_handler));
         x86_lidt(trap_table, sizeof trap_table);
-        // outb(0x21, 0xfd);
-        // outb(0xa1, 0xff);
-        // __asm__ volatile("sti");
         klog(DEBUG, "using idt trap_table at %p\n", trap_table);
 }
 
 void
 trap_handler(struct trapframe* tf)
 {
-        // klog(TRAP, "tf->trapno = %d\n", tf->trapno);
         (void)tf;
-        for (;;)
-                ;
+        trap_counter++;
+        last_trapno = tf->trapno;
+        klog(TRAP, "tf->trapno 0x%0x\n", tf->trapno);
+        for (;;);
 }
+// 

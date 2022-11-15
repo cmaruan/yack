@@ -1,18 +1,23 @@
 #include "x86.h"
 .section .text
-.type reload_segments, @function
-.globl reload_segments
-x86_load_gdt:
-        pushl %ebp
-        movl %esp, %ebp
+.type x86_lgdt, @function
+.globl x86_lgdt
+x86_lgdt:
+    mov 4(%esp), %edx    # EDX is 1st argument - GDT record pointer
+    mov 8(%esp), %eax    # EAX is 2nd argument - Data Selector
+    lgdt (%edx)          # Load GDT with GDT record pointer passed as 1st argument
+    mov %eax, %ds        # Reload all the data descriptors with Data selector (2nd arg)
+    mov %eax, %es
+    mov %eax, %gs
+    mov %eax, %fs
+    mov %eax, %ss
 
-        ljmpl $0x08, $(flush_cs)
-flush_cs:
-        movw $(X86_GDT_SEG_DATAK << 3), %ax
-        movw %ax, %es
-        movw %ax, %ss
-        movw %ax, %ds
-        movw %ax, %fs
-        movw %ax, %gs
-        ret
+    pushl 12(%esp)      # Create FAR pointer on stack using Code selector (3rd argument)
+    push $.setcs         # Offset of FAR JMP will be setcs label below
+    ljmp *(%esp)        # Do the FAR JMP to next instruction to set CS with Code selector,
+                        #    and set the EIP (instruction pointer) to offset of setcs
+.setcs:
+    add $8, %esp        # Restore stack (remove 2 DWORD values we put on stack to
+                        #     create FAR Pointer)
+    ret
 

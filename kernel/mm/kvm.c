@@ -18,7 +18,7 @@ static pde_t *kpagedir_;
 
 static char TSS[108];
 
-static uint8_t gdt_[X86_GDT_SEG_SIZE * 8];
+// static uint8_t gdt_[X86_GDT_SEG_SIZE * 8];
 
 ///////////////////////////////////////////////////////////////////////////////
 static int vm_map_page_(pde_t *directory, void *vaddr, void *paddr,
@@ -169,12 +169,11 @@ x86_gdt_set(struct gdt_entry *entry, uint32_t base, uint32_t limit,
 void
 segments_init()
 {
-        memset(gdt_, 0, sizeof gdt_);
-        klog(DEBUG, "GDT address: %p\n", gdt_);
-
         // x86_gdt_install();
 
         struct cpu *cpu = this_cpu();
+        memset(cpu->cpu_gdt, 0, sizeof(cpu->cpu_gdt));
+        klog(DEBUG, "GDT address: %p\n", cpu->cpu_gdt);
 
         x86_gdt_set(&cpu->cpu_gdt[X86_GDT_SEG_CODEK], 0, 0xFFFFFFFF, 0x9A,
                     0xCF);
@@ -188,8 +187,12 @@ segments_init()
                     0xF2, 0xCF);
 
         // x86_lgdt(MM_PHYSADDR(gdt_), sizeof gdt_);
-        x86_lgdt(gdt_, sizeof gdt_);
-        // reload_segments();
+        volatile uint16_t ptr[3];
+        uint32_t addr = (uint32_t)cpu->cpu_gdt;
+        ptr[0] = sizeof(cpu->cpu_gdt) - 1;
+        ptr[1] = (uint16_t)(addr);
+        ptr[2] = (uint16_t)((addr) >> 16);
+        x86_lgdt((void *)ptr, X86_GDT_SEG_DATAK << 3, X86_GDT_SEG_CODEK << 3);
         klog(DEBUG, "Segments loaded\n");
         klog(DEBUG, "CS: %x\n", x86_get_segment('c'));
         klog(DEBUG, "ES: %x\n", x86_get_segment('e'));

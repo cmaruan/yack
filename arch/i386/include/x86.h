@@ -300,19 +300,8 @@ x86_set_cr4(uint32_t value)
             : "%eax"     /* clobbered register */
         );
 }
-void reload_segments(void);
-static inline void
-x86_lgdt(void *desc, uint16_t size)
-{
-        volatile uint16_t ptr[3];
-        uint32_t addr = (uint32_t)desc;
-        ptr[0] = size - 1;
-        ptr[1] = (uint16_t)(addr);
-        ptr[2] = (uint16_t)((addr) >> 16);
-        klog(DEBUG, "lgdt: addr: %p, ptr: %x %x %x\n", addr, ptr[0], ptr[1],
-             ptr[2]);
-        asm volatile("lgdt (%0)" : : "r"(ptr));
-}
+void x86_lgdt(void *gdt_desc, int ds, int cs);
+
 
 static inline void
 x86_lidt(void *desc, uint16_t size)
@@ -435,6 +424,7 @@ x86_serial_config_line(uint16_t com, void *attr)
 }
 
 extern unsigned int trap_counter;
+extern unsigned int last_trapno;
 
 void trap_init();
 void trap_handler(struct trapframe *tf);
