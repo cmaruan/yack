@@ -4,7 +4,7 @@
 #include "x86.h"
 
 struct cpu {
-        uint32_t cpp_id;
+        u32 cpp_id;
         struct gdt_entry cpu_gdt[X86_GDT_SEG_SIZE];
 };
 

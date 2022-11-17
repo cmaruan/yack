@@ -2,20 +2,19 @@
 # TRAP
 .globl alltraps
 alltraps:
-  pushal
-
-  # Build trap frame.
+	# Build trap frame.
   pushl %ds
   pushl %es
   pushl %fs
   pushl %gs
+  pushal
   
   # Set up data segments.
-  movw $(0x10), %ax
+  movw $(X86_GDT_SEG_DATAK<<3), %ax
   movw %ax, %ds
   movw %ax, %es
 
-  # Call trap_handler(tf), where tf=%esp
+  # Call trap(tf), where tf=%esp
   pushl %esp
   call trap_handler
   addl $4, %esp
@@ -23,13 +22,13 @@ alltraps:
   # Return falls through to trapret...
 .globl trapret
 trapret:
+  popal
   popl %gs
   popl %fs
   popl %es
   popl %ds
-  popal
   addl $0x8, %esp  # trapno and errcode
-  iret
+  iret  
 
 
 

@@ -5,7 +5,7 @@
 #include "spinlock.h"
 
 struct page {
-        uint32_t magic_number;
+        u32 magic_number;
         struct list_head free_list;
 };
 

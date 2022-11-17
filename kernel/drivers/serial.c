@@ -2,11 +2,11 @@
 
 #include "types.h"
 
-uint16_t serial_default_port_;
-uint16_t serial_ports_[SERIAL_PORTS_MAX];
+u16 serial_default_port_;
+u16 serial_ports_[SERIAL_PORTS_MAX];
 
 void
-serial_init_port(uint16_t com)
+serial_init_port(u16 com)
 {
         int i;
         for (i = 0; i < SERIAL_PORTS_MAX && serial_ports_[i] != 0; i++) {
@@ -22,7 +22,7 @@ serial_init_port(uint16_t com)
         }
         x86_serial_config_baud_rate(com, 12);
         x86_serial_config_line(com, NULL);
-        uint8_t status = inb(X86_SERIAL_LINE_STATUS_PORT(com));
+        u8 status = inb(X86_SERIAL_LINE_STATUS_PORT(com));
         if (status == 0xFF) {
                 klog(DEBUG, "Port %p not available\n", com);
                 return;
@@ -31,7 +31,7 @@ serial_init_port(uint16_t com)
 }
 
 int
-serial_set_default_port(uint16_t com)
+serial_set_default_port(u16 com)
 {
         kassert(com > 0);
         int i;
@@ -51,14 +51,14 @@ serial_set_default_port(uint16_t com)
 int
 serial_write(const char *buffer, size_t size)
 {
-        uint16_t com = serial_default_port_;
+        u16 com = serial_default_port_;
         serial_default_port_ = 0;
         if (com == 0) {
                 return 0;
         }
         int bytes = 0;
         for (; size-- != 0; buffer++, bytes++) {
-                uint8_t status;
+                u8 status;
                 do {
                         status = inb(X86_SERIAL_LINE_STATUS_PORT(com));
                 } while (status == 0x20);

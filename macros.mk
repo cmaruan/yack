@@ -10,16 +10,19 @@ _LD = $(TOOLPREFIX)ld
 _OBJCOPY = $(TOOLPREFIX)objcopy
 _OBJDUMP = $(TOOLPREFIX)objdump
 _RM = rm
+_MAKE := $(MAKE)
 AT=@
 
+LIBNAME = 
+
 ifndef VERBOSE
-	export CC= $(AT)echo      "[CC]      $@"; $(_CC) 
-	export AS= $(AT)echo      "[AS]      $@"; $(_AS) 
-	export AR= $(AT)echo      "[AR]      $@"; $(_AR) 
-	export LD= $(AT)echo      "[LD]      $@"; $(_LD) 
-	export RM= $(AT)echo      "[RM]      $@"; $(_RM)
-	export OBJCOPY= $(AT)echo "[OBJCOPY] $@"; $(_OBJCOPY) 
-	export OBJDUMP= $(AT)echo "[OBJDUMP] $@"; $(_OBJDUMP)
+	export CC= $(AT)echo      "[CC]      $(shell basename $@)"; $(_CC) 
+	export AS= $(AT)echo      "[AS]      $(shell basename $@)"; $(_AS) 
+	export AR= $(AT)echo      "[AR]      $(shell basename $@)"; $(_AR) 
+	export LD= $(AT)echo      "[LD]      $(shell basename $@)"; $(_LD) 
+	export RM= $(AT)echo      "[RM]      $(shell basename $@)"; $(_RM)
+	export OBJCOPY= $(AT)echo "[OBJCOPY] $(shell basename $@)"; $(_OBJCOPY) 
+	export OBJDUMP= $(AT)echo "[OBJDUMP] $(shell basename $@)"; $(_OBJDUMP)
 else
 	export CC=$(_CC)
 	export AS=$(_AS)

@@ -27,9 +27,9 @@ enum vga_color {
 
 #define VGA_MEMORY_ADDRESS (void *)0xB8000
 #define TO_VGA(c) \
-        (((uint16_t)(c)) | ((VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4)) << 8)
+        (((u16)(c)) | ((VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4)) << 8)
 
-static uint16_t *buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
+static u16 *buffer = MM_VIRTADDR(VGA_MEMORY_ADDRESS);
 
 static int col;
 static int row;
@@ -43,7 +43,7 @@ static int row;
 #define FB_LOW_BYTE_COMMAND  15
 
 static void
-move_cursor_(uint16_t pos)
+move_cursor_(u16 pos)
 {
         outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
         outb(FB_DATA_PORT, ((pos >> 8) & 0x00FF));

@@ -1,7 +1,7 @@
 #include "memop.h"
 
 void*
-memset(void* ptr_, uint8_t val, size_t size)
+memset(void* ptr_, u8 val, size_t size)
 {
         char* ptr = ptr_;
         while (size-- != 0) {

@@ -23,7 +23,7 @@ strlen(const char *src)
 }
 
 static const char *
-utoa(uint32_t value, int base)
+utoa(u32 value, int base)
 {
         static char buffer[16] = {0};
         char *ptr = buffer + 14;
@@ -45,7 +45,7 @@ utoa(uint32_t value, int base)
 }
 
 static const char *
-itoa(int32_t value, int base)
+itoa(i32 value, int base)
 {
         int neg = 0;
         if (value < 0) {
@@ -91,7 +91,7 @@ kvsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
                         fill_zeroes = 1;
                         // fallthrough
                 case 'x':
-                        text = utoa((uint32_t)va_arg(ap, void *), 16);
+                        text = utoa((u32)va_arg(ap, void *), 16);
                         fill_length = 8;
                         break;
                 case 's':
@@ -102,7 +102,7 @@ kvsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
                         text = "";
                         break;
                 case 'u':
-                        text = utoa(va_arg(ap, uint32_t), 10);
+                        text = utoa(va_arg(ap, u32), 10);
                         break;
                 default:
                         text = "";

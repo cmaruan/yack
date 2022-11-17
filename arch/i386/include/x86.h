@@ -84,13 +84,13 @@
 #define X86_PD_INDEX(va) (((va) >> X86_PDOFF) & 0x3FF)
 // Extract Page Table Index from Virtual Address
 #define X86_PT_INDEX(va)   (((va) >> X86_PTOFF) & 0x3FF)
-#define X86_PTE_ADDR(pte)  ((uint32_t)(pte) & (~0xFFF))
-#define X86_PTE_FLAGS(pte) ((uint32_t)(pte) & (0xFFF))
+#define X86_PTE_ADDR(pte)  ((u32)(pte) & (~0xFFF))
+#define X86_PTE_FLAGS(pte) ((u32)(pte) & (0xFFF))
 
 // Make Virtual Address from directory, table and offset
-#define X86_MKVA(dir, tab, off)                   \
-        ((uint32_t)((dir & 0x3FF) << X86_PDOFF) | \
-         ((tab & 0x3FF) << X86_PTOFF) | (off & 0xFFF))
+#define X86_MKVA(dir, tab, off)                                             \
+        ((u32)((dir & 0x3FF) << X86_PDOFF) | ((tab & 0x3FF) << X86_PTOFF) | \
+         (off & 0xFFF))
 
 #define X86_PG_ROUNDUP(size)   (((size) + X86_PAGESZ - 1) & ~(X86_PAGESZ - 1))
 #define X86_PG_ROUNDDOWN(size) ((size) & ~(X86_PAGESZ - 1))
@@ -138,62 +138,62 @@
 
 // GDT registry
 struct gdtr {
-        uint16_t g_limit;
-        uint32_t g_base;
+        u16 g_limit;
+        u32 g_base;
 } __attribute__((packed));
 
 // a GDT entry
 struct gdt_entry {
-        uint16_t ge_limit_low;  // bits 0-15
-        uint16_t ge_base_low;   // bits 0-15
-        uint8_t ge_base_mid;    // bits 16-23
-        uint8_t ge_access;      // access byte
-        uint8_t ge_flags;       // granularity and size flags
-        uint8_t ge_base_high;   // bits 24-31
+        u16 ge_limit_low;  // bits 0-15
+        u16 ge_base_low;   // bits 0-15
+        u8 ge_base_mid;    // bits 16-23
+        u8 ge_access;      // access byte
+        u8 ge_flags;       // granularity and size flags
+        u8 ge_base_high;   // bits 24-31
 } __attribute__((packed));
 
 struct arch_cpu {
-        uint8_t c_apicid;
+        u8 c_apicid;
 };
 
 struct trapframe {
         // registers as pushed by pusha
-        uint32_t edi;
-        uint32_t esi;
-        uint32_t ebp;
-        uint32_t oesp;  // useless & ignored
-        uint32_t ebx;
-        uint32_t edx;
-        uint32_t ecx;
-        uint32_t eax;
+        u32 edi;
+        u32 esi;
+        u32 ebp;
+        u32 oesp;  // useless & ignored
+        u32 ebx;
+        u32 edx;
+        u32 ecx;
+        u32 eax;
 
         // rest of trap frame
-        uint16_t gs;
-        uint16_t padding1;
-        uint16_t fs;
-        uint16_t padding2;
-        uint16_t es;
-        uint16_t padding3;
-        uint16_t ds;
-        uint16_t padding4;
-        uint32_t trapno;
+        u16 gs;
+        u16 padding1;
+        u16 fs;
+        u16 padding2;
+        u16 es;
+        u16 padding3;
+        u16 ds;
+        u16 padding4;
+        u32 trapno;
 
         // below here defined by x86 hardware
-        uint32_t err;
-        uint32_t eip;
-        uint16_t cs;
-        uint16_t padding5;
-        uint32_t eflags;
+        u32 err;
+        u32 eip;
+        u16 cs;
+        u16 padding5;
+        u32 eflags;
 
         // below here only when crossing rings, such as from user to kernel
-        uint32_t esp;
-        uint16_t ss;
-        uint16_t padding6;
+        u32 esp;
+        u16 ss;
+        u16 padding6;
 };
 
-typedef uint32_t pde_t;
+typedef u32 pde_t;
 extern pde_t x86_page_directory[];
-extern uint32_t x86_lapic;
+extern u32 x86_lapic;
 
 static inline void
 cli(void)
@@ -215,37 +215,37 @@ stosb(void *addr, int data, int cnt)
                      : "0"(addr), "1"(cnt), "a"(data)
                      : "memory", "cc");
 }
-static inline uint32_t
+static inline u32
 x86_get_cr0()
 {
-        uint32_t value;
+        u32 value;
         asm volatile("movl %%cr0, %0;"
                      : "=r"(value) /* output */
         );
         return value;
 }
-static inline uint32_t
+static inline u32
 x86_get_cr2()
 {
-        uint32_t value;
+        u32 value;
         asm volatile("movl %%cr2, %0;"
                      : "=r"(value) /* output */
         );
         return value;
 }
-static inline uint32_t
+static inline u32
 x86_get_cr3()
 {
-        uint32_t value;
+        u32 value;
         asm volatile("movl %%cr3, %0;"
                      : "=r"(value) /* output */
         );
         return value;
 }
-static inline uint32_t
+static inline u32
 x86_get_cr4()
 {
-        uint32_t value;
+        u32 value;
         asm volatile("movl %%cr4, %0;"
                      : "=r"(value) /* output */
         );
@@ -253,7 +253,7 @@ x86_get_cr4()
 }
 
 static inline void
-x86_set_cr0(uint32_t value)
+x86_set_cr0(u32 value)
 {
         asm volatile(
             "movl %%cr0, %%eax; "
@@ -265,7 +265,7 @@ x86_set_cr0(uint32_t value)
         );
 }
 static inline void
-x86_set_cr2(uint32_t value)
+x86_set_cr2(u32 value)
 {
         asm volatile(
             "movl %%cr2, %%eax; "
@@ -277,7 +277,7 @@ x86_set_cr2(uint32_t value)
         );
 }
 static inline void
-x86_set_cr3(uint32_t value)
+x86_set_cr3(u32 value)
 {
         asm volatile(
             "movl %%cr3, %%eax; "
@@ -289,7 +289,7 @@ x86_set_cr3(uint32_t value)
         );
 }
 static inline void
-x86_set_cr4(uint32_t value)
+x86_set_cr4(u32 value)
 {
         asm volatile(
             "movl %%cr4, %%eax; "
@@ -302,15 +302,14 @@ x86_set_cr4(uint32_t value)
 }
 void x86_lgdt(void *gdt_desc, int ds, int cs);
 
-
 static inline void
-x86_lidt(void *desc, uint16_t size)
+x86_lidt(void *desc, u16 size)
 {
-        volatile uint16_t ptr[3];
-        uint32_t addr = (uint32_t)desc;
+        volatile u16 ptr[3];
+        u32 addr = (u32)desc;
         ptr[0] = size - 1;
-        ptr[1] = (uint16_t)(addr);
-        ptr[2] = (uint16_t)((addr) >> 16);
+        ptr[1] = (u16)(addr);
+        ptr[2] = (u16)((addr) >> 16);
         klog(DEBUG, "lidt: addr: %p, ptr: %x %x %x\n", addr, ptr[0], ptr[1],
              ptr[2]);
 
@@ -318,21 +317,32 @@ x86_lidt(void *desc, uint16_t size)
 }
 
 static inline void
-outb(uint16_t port, uint8_t data)
+outb(u16 port, u8 data)
 {
         asm volatile("out %0,%1" : : "a"(data), "d"(port));
 }
 
 static inline void
-outw(uint16_t port, uint16_t data)
+outw(u16 port, u16 data)
 {
         asm volatile("out %0,%1" : : "a"(data), "d"(port));
 }
-
-static inline uint8_t
-inb(uint16_t port)
+static inline void
+io_wait(void)
 {
-        uint8_t data;
+        outb(0x80, 0);
+}
+static inline u8
+inb(u16 port)
+{
+        u8 data;
+        asm volatile("in %1,%0" : "=a"(data) : "d"(port));
+        return data;
+}
+static inline u16
+inw(u16 port)
+{
+        u16 data;
         asm volatile("in %1,%0" : "=a"(data) : "d"(port));
         return data;
 }
@@ -344,19 +354,53 @@ insl(int port, void *addr, int cnt)
                      : "d"(port), "0"(addr), "1"(cnt)
                      : "memory", "cc");
 }
+
+#define X86_PIC1_CMD    0x20
+#define X86_PIC1_DATA   0x21
+#define X86_PIC2_CMD    0xA0
+#define X86_PIC2_DATA   0xA1
+#define X86_PIC1_OFFSET 0x20
+#define X86_PIC2_OFFSET 0x28
+
+/* reinitialize the PIC controllers, giving them specified vector offsets
+   rather than 8h and 70h, as configured by default */
+
+#define ICW1_ICW4      0x01 /* ICW4 (not) needed */
+#define ICW1_SINGLE    0x02 /* Single (cascade) mode */
+#define ICW1_INTERVAL4 0x04 /* Call address interval 4 (8) */
+#define ICW1_LEVEL     0x08 /* Level triggered (edge) mode */
+#define ICW1_INIT      0x10 /* Initialization - required! */
+
+#define ICW4_8086       0x01 /* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO       0x02 /* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE  0x08 /* Buffered mode/slave */
+#define ICW4_BUF_MASTER 0x0C /* Buffered mode/master */
+#define ICW4_SFNM       0x10 /* Special fully nested (not) */
+
+#define PIC_EOI 0x20 /* End-of-interrupt command code */
+
+static inline void
+x86_pic_eoi(unsigned char irq)
+{
+        if (irq >= X86_PIC1_OFFSET)
+                outb(X86_PIC1_CMD, PIC_EOI);
+        if (irq >= X86_PIC2_OFFSET)
+                outb(X86_PIC2_CMD, PIC_EOI);
+}
+
 /*
  * Flush the GDT registry to the processor. This function is
  * defined in `boot.s'.
  */
 extern void gdt_flush(struct gdtr gdtr);
 
-// void x86_gdt_set(size_t num, uint32_t base, uint32_t limit, uint8_t access,
-//                  uint8_t flags);
+// void x86_gdt_set(size_t num, u32 base, u32 limit, u8 access,
+//                  u8 flags);
 
 // void x86_gdt_install();
 
 // static inline void
-// x86_encode_gdt_entry(uint8_t *target, const struct gdt *entry)
+// x86_encode_gdt_entry(u8 *target, const struct gdt *entry)
 // {
 //         // Check the limit to make sure that it can be encoded
 //         if (entry->dt_limit > 0xFFFFF) {
@@ -396,7 +440,7 @@ extern void gdt_flush(struct gdtr gdtr);
 /// @param com COM port to be configured
 /// @param divisor Baud rate divisor
 static inline void
-x86_serial_config_baud_rate(uint16_t com, uint16_t divisor)
+x86_serial_config_baud_rate(u16 com, u16 divisor)
 {
         outb(X86_SERIAL_LINE_CMD_PORT(com), X86_SERIAL_LINE_ENABLE_DLAB);
         outb(X86_SERIAL_DATA_PORT(com), (divisor >> 8) & 0xFF);
@@ -413,7 +457,7 @@ x86_serial_config_baud_rate(uint16_t com, uint16_t divisor)
 /// @param com COM port to be configured
 /// @param attr Pointer to attributes object. Not used and must be set to NULL
 static inline void
-x86_serial_config_line(uint16_t com, void *attr)
+x86_serial_config_line(u16 com, void *attr)
 {
         /* Bit:     | 7 | 6 | 5 4 3 | 2 | 1 0 |
          * Content: | d | b | prty  | s | dl  |

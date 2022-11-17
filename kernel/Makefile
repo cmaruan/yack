@@ -46,9 +46,11 @@ export CPPFLAGS += $(KERNEL_ARCH_CPPFLAGS)
 
 
 $(LIBDIRS): 
-	$(MAKE) -C $@
+	$(AT)echo "*** Building $@"
+	$(AT)$(MAKE) -C $@
 
 kernel.elf: $(LIBDIRS) $(OBJS) $(ARCHDIR)/linker.ld
+	$(AT)echo "*** Building $@"
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST) $(LINKFLAGS)
 
 $(ARCHDIR)/crtend.o $(ARCHDIR)/crtbegin.o:
@@ -58,6 +60,6 @@ clean: $(SUBDIRSCLEAN)
 	$(RM) -rf *.a $(KERNEL_OBJS) kernel.elf $(ARCHDIR)/*.o
 
 %clean: 
-	$(MAKE) -C $(subst clean,,$@) clean
+	$(AT)$(MAKE) -C $(subst clean,,$@) clean
 
 .PHONY: $(LIBDIRS) kernel

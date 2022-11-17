@@ -9,7 +9,7 @@ struct gdtr gdtr;
 // x86_gdt_install()
 // {
 //         gdtr.g_limit = sizeof(gdtr) - 1;
-//         gdtr.g_base = (uint32_t)X86_PHYSADDR(gdt);
+//         gdtr.g_base = (u32)X86_PHYSADDR(gdt);
 
 //         klog(DEBUG, "Null descriptior\n");
 //         // null-descriptor

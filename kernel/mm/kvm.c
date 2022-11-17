@@ -5,7 +5,7 @@
 #include "mm/pages.h"
 #include "mm/vm.h"
 
-typedef uint32_t pte_t;
+typedef u32 pte_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // These symbols are exported by linker.ld
@@ -18,11 +18,9 @@ static pde_t *kpagedir_;
 
 static char TSS[108];
 
-// static uint8_t gdt_[X86_GDT_SEG_SIZE * 8];
-
 ///////////////////////////////////////////////////////////////////////////////
 static int vm_map_page_(pde_t *directory, void *vaddr, void *paddr,
-                        uint16_t permissions);
+                        u16 permissions);
 
 ///////////////////////////////////////////////////////////////////////////////
 pde_t *
@@ -79,13 +77,13 @@ kvm_init()
 void
 kmv_switch()
 {
-        x86_set_cr3((uint32_t)MM_PHYSADDR(kpagedir_));
+        x86_set_cr3((u32)MM_PHYSADDR(kpagedir_));
 }
 ///////////////////////////////////////////////////////////////////////////////
 
 ssize_t
 vm_map_pages(pde_t *directory, void *vaddr, void *paddr, size_t size,
-             uint16_t permissions)
+             u16 permissions)
 {
         // NOTE from https://wiki.osdev.org/Paging
         // X86_PTE_US, the 'User/Supervisor' bit, controls access to the page
@@ -109,17 +107,17 @@ vm_map_pages(pde_t *directory, void *vaddr, void *paddr, size_t size,
         return total_maps;
 }
 ///////////////////////////////////////////////////////////////////////////////
-static inline uint16_t *
+static inline u16 *
 x86_get_gdt()
 {
-        static uint16_t values[3];
+        static u16 values[3];
         asm volatile("sgdt (%0)" : "=m"(values));
         return values;
 }
-static inline uint32_t
+static inline u32
 x86_get_segment(char segment)
 {
-        uint32_t value;
+        u32 value;
         switch (segment) {
         case 'e':
                 asm volatile("movl %%es, %0;" : "=r"(value));
@@ -146,8 +144,8 @@ x86_get_segment(char segment)
         return value;
 }
 static void
-x86_gdt_set(struct gdt_entry *entry, uint32_t base, uint32_t limit,
-            uint8_t access, uint8_t flags)
+x86_gdt_set(struct gdt_entry *entry, u32 base, u32 limit,
+            u8 access, u8 flags)
 {
         // base
         entry->ge_base_low = base & 0xFFFF;
@@ -161,8 +159,8 @@ x86_gdt_set(struct gdt_entry *entry, uint32_t base, uint32_t limit,
         // access and granularity flags
         entry->ge_flags |= flags & 0xF0;
         entry->ge_access = access;
-        uint8_t *bytes = (uint8_t *)entry;
-        uint32_t *binary = (uint32_t *)bytes;
+        u8 *bytes = (u8 *)entry;
+        u32 *binary = (u32 *)bytes;
         klog(DEBUG, "GDT Entry: %0x %0x\n", binary[1], binary[0]);
 }
 
@@ -183,15 +181,15 @@ segments_init()
                     0xCF);
         x86_gdt_set(&cpu->cpu_gdt[X86_GDT_SEG_DATAU], 0, 0xFFFFFFFF, 0xF2,
                     0xCF);
-        x86_gdt_set(&cpu->cpu_gdt[X86_GDT_SEG_TSS], (uint32_t)TSS, sizeof(TSS),
+        x86_gdt_set(&cpu->cpu_gdt[X86_GDT_SEG_TSS], (u32)TSS, sizeof(TSS),
                     0xF2, 0xCF);
 
         // x86_lgdt(MM_PHYSADDR(gdt_), sizeof gdt_);
-        volatile uint16_t ptr[3];
-        uint32_t addr = (uint32_t)cpu->cpu_gdt;
+        volatile u16 ptr[3];
+        u32 addr = (u32)cpu->cpu_gdt;
         ptr[0] = sizeof(cpu->cpu_gdt) - 1;
-        ptr[1] = (uint16_t)(addr);
-        ptr[2] = (uint16_t)((addr) >> 16);
+        ptr[1] = (u16)(addr);
+        ptr[2] = (u16)((addr) >> 16);
         x86_lgdt((void *)ptr, X86_GDT_SEG_DATAK << 3, X86_GDT_SEG_CODEK << 3);
         klog(DEBUG, "Segments loaded\n");
         klog(DEBUG, "CS: %x\n", x86_get_segment('c'));
@@ -200,7 +198,7 @@ segments_init()
         klog(DEBUG, "DS: %x\n", x86_get_segment('d'));
         klog(DEBUG, "FS: %x\n", x86_get_segment('f'));
         klog(DEBUG, "GS: %x\n", x86_get_segment('g'));
-        uint16_t *values = x86_get_gdt();
+        u16 *values = x86_get_gdt();
         klog(DEBUG, "SGDT: %x %x %x\n", values[0], values[1], values[2]);
 }
 
@@ -208,11 +206,11 @@ segments_init()
 // Static Functions
 ///////////////////////////////////////////////////////////////////////////////
 static int
-vm_map_page_(pde_t *directory, void *vaddr, void *paddr, uint16_t permissions)
+vm_map_page_(pde_t *directory, void *vaddr, void *paddr, u16 permissions)
 {
         kassert(mm_is_page_aligned(vaddr) && mm_is_page_aligned(paddr));
-        int table_index = X86_PT_INDEX((uint32_t)vaddr);
-        int page_index = X86_PD_INDEX((uint32_t)vaddr);
+        int table_index = X86_PT_INDEX((u32)vaddr);
+        int page_index = X86_PD_INDEX((u32)vaddr);
         pde_t *dir_entry = &directory[page_index];
         pte_t *page_table;
 
@@ -240,6 +238,6 @@ vm_map_page_(pde_t *directory, void *vaddr, void *paddr, uint16_t permissions)
 
         // // If we are mapping a page, we are making it present
         page_table[table_index] =
-            (uint32_t)paddr | permissions | X86_PTE_PRESENT;
+            (u32)paddr | permissions | X86_PTE_PRESENT;
         return 0;
 }

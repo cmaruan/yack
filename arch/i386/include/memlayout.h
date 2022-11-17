@@ -14,14 +14,14 @@
 #define MM_EXTENDED_MEM ((void *)X86_EXTENDED_MEMORY)
 #define MM_KERNEL_LINK  ((void *)X86_KERNEL_LINK)
 
-#define MM_VIRTADDR(pa) ((void *)X86_VIRTADDR((uint32_t)(pa)))
-#define MM_PHYSADDR(va) ((void *)X86_PHYSADDR((uint32_t)(va)))
+#define MM_VIRTADDR(pa) ((void *)X86_VIRTADDR((u32)(pa)))
+#define MM_PHYSADDR(va) ((void *)X86_PHYSADDR((u32)(va)))
 
 #define MM_PGSIZE            X86_PAGESZ
-#define MM_PAGEUP(address)   X86_PG_ROUNDUP((uint32_t)(address))
-#define MM_PAGEDOWN(address) X86_PG_ROUNDDOWN((uint32_t)(address))
+#define MM_PAGEUP(address)   X86_PG_ROUNDUP((u32)(address))
+#define MM_PAGEDOWN(address) X86_PG_ROUNDDOWN((u32)(address))
 
 // Returns 0 if address is not aligned to page size
-#define mm_is_page_aligned(addr) ((((uint32_t)(addr)) % MM_PGSIZE) == 0)
+#define mm_is_page_aligned(addr) ((((u32)(addr)) % MM_PGSIZE) == 0)
 
 #endif  // ARCH_I386_MEMLAYOUT_H

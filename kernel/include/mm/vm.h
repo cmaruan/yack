@@ -21,10 +21,10 @@ void kmv_switch();
 /// @param vaddr The virtual address
 /// @param paddr The physical address being mapped to
 /// @param size Number of pages to be mapped
-/// @param uint16_t Permissions on the tables
+/// @param u16 Permissions on the tables
 /// @return Number of pages mapped. -1 if error
 ssize_t vm_map_pages(pde_t *directory, void *vaddr, void *paddr, size_t size,
-                     uint16_t uint16_t);
+                     u16 u16);
 
 /// @brief
 void segments_init();
