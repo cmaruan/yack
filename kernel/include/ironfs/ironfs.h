@@ -3,4 +3,4 @@
 
 int foo();
 
-#endif // KERNEL_IRONFS_H
+#endif  // KERNEL_IRONFS_H

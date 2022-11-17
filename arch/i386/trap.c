@@ -34,11 +34,119 @@ struct trap_handler trap_table[256];
 typedef void (*trap_handler_func_t)(struct trapframe* tf);
 trap_handler_func_t trap_callback_table[256];
 
-void keyboard_handler(struct trapframe* tf)
+#define KEY_Fn(n)        0
+#define KEY_LSHIFT       0
+#define KEY_RSHIFT       0
+#define KEY_HOME         0
+#define KEY_ARROW_UP     0
+#define KEY_PGUP         0
+#define KEY_ARROW_LEFT   0
+#define KEY_ARROW_CENTER 0
+#define KEY_ARROW_RIGHT  0
+#define KEY_END          0
+#define KEY_ARROW_DOWN   0
+#define KEY_PGDOWN       0
+#define KEY_INS          0
+#define KEY_DEL          0
+#define KEY_CAPSLOCK     0
+#define KEY_ALT          0
+#define KEY_CTRL         0
+#define KEY_ESC          0
+
+int keyboard_scan_codes[256] = {
+    [1] = KEY_ESC,
+    [2] = '1',
+    [3] = '2',
+    [4] = '3',
+    [5] = '4',
+    [6] = '5',
+    [7] = '6',
+    [8] = '7',
+    [9] = '8',
+    [10] = '9',
+    [11] = '0',
+    [12] = '-',
+    [13] = '=',
+    [14] = '\b',
+    [15] = '\t',
+    [16] = 'Q',
+    [17] = 'W',
+    [18] = 'E',
+    [19] = 'R',
+    [20] = 'T',
+    [21] = 'Y',
+    [22] = 'U',
+    [23] = 'I',
+    [24] = 'O',
+    [25] = 'P',
+    [26] = '[',
+    [27] = ']',
+    [28] = '\n',
+    [29] = KEY_CTRL,
+    [30] = 'A',
+    [31] = 'S',
+    [32] = 'D',
+    [33] = 'F',
+    [34] = 'G',
+    [35] = 'H',
+    [36] = 'J',
+    [37] = 'K',
+    [38] = 'L',
+    [39] = ';',
+    [40] = '\'',
+    [41] = '`',
+    [42] = KEY_LSHIFT,
+    [43] = '\\',
+    [44] = 'Z',
+    [45] = 'X',
+    [46] = 'C',
+    [47] = 'V',
+    [48] = 'B',
+    [49] = 'N',
+    [50] = 'M',
+    [51] = ',',
+    [52] = '.',
+    [53] = '/',
+    [54] = KEY_RSHIFT,
+    // [55] = 	'PrtSc',
+    [56] = KEY_ALT,
+    [57] = ' ',
+    [58] = KEY_CAPSLOCK,
+    [59] = KEY_Fn(1),
+    [60] = KEY_Fn(2),
+    [61] = KEY_Fn(3),
+    [62] = KEY_Fn(4),
+    [63] = KEY_Fn(5),
+    [64] = KEY_Fn(6),
+    [65] = KEY_Fn(7),
+    [66] = KEY_Fn(8),
+    [67] = KEY_Fn(9),
+    [68] = KEY_Fn(10),
+    // [69] = 	'Num',
+    // [70] = 	'Scroll',
+    [71] = KEY_HOME,
+    [72] = KEY_ARROW_UP,
+    [73] = KEY_PGUP,
+    [74] = '-',
+    [75] = KEY_ARROW_LEFT,
+    // [76] = 	KEY_ARROW_CENTER, // ??
+    [77] = KEY_ARROW_RIGHT,
+    [78] = '+',
+    [79] = KEY_END,
+    [80] = KEY_ARROW_DOWN,
+    [81] = KEY_PGDOWN,
+    [82] = KEY_INS,
+    [83] = KEY_DEL,
+};
+
+void
+keyboard_handler(struct trapframe* tf)
 {
         (void)tf;
         u8 byte = inb(0x60);
-        klog(TRAP, "From keyboard: %x\n", byte);
+        if (keyboard_scan_codes[byte]) {
+                klog(TRAP, "Letter: %c\n", keyboard_scan_codes[byte]);
+        }
 }
 
 void
@@ -74,7 +182,6 @@ x86_pic_remap(u8 offset1, u8 offset2)
         outb(X86_PIC1_DATA, a1);  // restore saved masks.
         outb(X86_PIC2_DATA, a2);
 }
-
 
 void
 x86_set_idt_gate(int interrupt, void* base, u16 seg_desc, u8 flags)
@@ -151,10 +258,11 @@ trap_handler(struct trapframe* tf)
         last_trapno = tf->trapno;
         // // log_trapframe(tf);
         if (last_trapno != X86_PIC1_OFFSET)
-                klog(TRAP, "trapcounter: 0x%0x    trapno: %x\n", trap_counter, tf->trapno);
+                klog(TRAP, "trapcounter: 0x%0x    trapno: %x\n", trap_counter,
+                     tf->trapno);
         if (trap_callback_table[tf->trapno]) {
                 trap_callback_table[tf->trapno](tf);
-        } 
+        }
         // else {
         //         klog(TRAP, "No handler available\n");
         // }
